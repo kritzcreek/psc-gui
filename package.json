@@ -1,0 +1,21 @@
+{
+  "name": "psc-gui",
+  "version": "1.0.0",
+  "description": "A GUI for the psc-ide tool",
+  "main": "main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "run": "./node_modules/.bin/electron .",
+    "test": "pulp test"
+  },
+  "author": "kRITZCREEK",
+  "license": "GPL",
+  "devDependencies": {
+    "electron-prebuilt": "^0.33.4"
+  },
+  "dependencies": {
+    "ramda": "^0.17.1"
+  }
+}
