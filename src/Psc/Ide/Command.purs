@@ -8,9 +8,11 @@ import Data.Argonaut.Core
 import Data.Argonaut.Encode (EncodeJson, encodeJson)
 import Data.Argonaut.Decode (DecodeJson, decodeJson)
 
+import Data.Array (tail)
 import Data.Either
 import Data.Maybe
 import Data.Maybe.Unsafe
+import Data.String (split)
 
 data PSType = Package | Ident
 
@@ -127,8 +129,7 @@ instance decodeMessage :: DecodeJson Message where
 instance decodeModules :: DecodeJson Modules where
   decodeJson json = do
     ms <- decodeJson json
-    return (Modules ms)
-
+    return (Modules (fromJust $ tail (split ", " ms)))
 
 instance decodeCompletion :: DecodeJson Completion where
   decodeJson json = do
