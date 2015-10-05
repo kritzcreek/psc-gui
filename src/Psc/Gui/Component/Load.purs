@@ -9,6 +9,7 @@ import Data.String (split)
 
 import Node.Process
 import Psc.Ide.Command
+import Psc.Gui.Component.Util
 
 import qualified Thermite as T
 import qualified Thermite.Action as T
@@ -17,26 +18,47 @@ import qualified React as R
 import qualified React.DOM as D
 import qualified React.DOM.Props as P
 
-data Action = Refresh | LoadModule String | LoadDependency String
-type State = {modules :: Array String}
+data Action = Refresh | LoadModule | LoadDependency | InputChange String
+type State = {modules :: Array String, moduleInput :: String}
 type LoadProps = {}
 type LoadEff eff = ( process :: PROCESS | eff )
-initialState = {modules: []}
+initialState = {modules: [], moduleInput: "Module.Name"}
 
 render :: forall eff. T.Render (LoadEff eff) State LoadProps Action
 render send state props children = D.div [P.key "load"] [
   D.button
     [P.onClick \_ -> send Refresh]
-    [D.text "Loaded Modules"]
-  , D.ul' (map (\m -> D.li' [D.text m]) state.modules)
+    [D.text "Refresh"],
+  D.input
+    [P.onChange \e -> send (InputChange (unsafeTargetValue e))
+    , P.value state.moduleInput
+    ]
+    [],
+  D.button
+    [P.onClick \_ -> send LoadModule]
+    [D.text "Load Module"],
+  D.button
+    [P.onClick \_ -> send LoadDependency]
+    [D.text "Load Dependencies"],
+  D.ul' (map (\m -> D.li' [D.text m]) state.modules)
+
   ]
 
 performAction :: forall eff. T.PerformAction (LoadEff eff) State LoadProps Action
 performAction _ Refresh = do
   mods <- liftEff $ list
   case mods of
-    Right (Modules ms) -> T.setState {modules: ms}
+    Right (Modules ms) -> T.modifyState (\s -> s {modules=ms})
     Left err -> liftEff (log err)
+performAction _ (InputChange i) = T.modifyState (\s -> s {moduleInput=i})
+performAction _ LoadModule = do
+  i <- T.getState
+  res <- liftEff (load [i.moduleInput] [])
+  liftEff (either log (\(Message s) -> log s) res)
+performAction _ LoadDependency = do
+  i <- T.getState
+  res <- liftEff (load [] [i.moduleInput])
+  liftEff (either log (\(Message s) -> log s) res)
 
 spec :: forall eff. T.Spec (LoadEff eff) State LoadProps Action
 spec = T.simpleSpec initialState performAction render
