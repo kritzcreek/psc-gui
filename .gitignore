@@ -5,3 +5,4 @@
 /src/.webpack.js
 *.tix
 .browserify-cache*
+app.js

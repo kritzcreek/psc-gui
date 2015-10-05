@@ -6,7 +6,7 @@ import           Data.Either
 import           Data.Maybe.Unsafe
 import           Data.Nullable (toMaybe)
 import           PscIde.Command
-import           Node.Process.Browser
+import           Node.Process
 import           DOM (DOM())
 import           DOM.HTML (window)
 import           DOM.HTML.Document (body)

@@ -1,17 +1,19 @@
 //module Node.Process
 
-var process = require('child_process')
-var R = require('ramda');
+var child_process = process.type === 'browser' ?
+  require('child_process') : window.require('remote').require('child_process')
 
-var exec = function(cmd, input){
-  return function(){
-    return process.execSync(cmd, {
-      input: input,
-      encoding: "utf-8"
-    })
+var exec = function(cmd){
+  return function(input){
+    return function(){
+      return child_process.execSync(cmd, {
+        input: input,
+        encoding: "utf-8"
+      })
+    }
   }
 }
 
 module.exports = {
-  exec: R.curry(exec)
+  exec: exec
 }
