@@ -37,11 +37,11 @@ pursuitCompletionCard (PursuitCompletion pc)= D.li' [
 render :: forall eff. T.Render (PursuitEff eff) State PursuitProps Action
 render send state props children =
   D.div' [
-  D.input
+  sinput
     [P.onChange \e -> send (InputChange (unsafeTargetValue e))
     , P.value state.input
-    ] [],
-  D.button
+    ],
+  sbutton "green"
     [P.onClick \_ -> send SearchCompletion]
     [D.text "Search completions"],
   D.ul' (map pursuitCompletionCard state.completions)

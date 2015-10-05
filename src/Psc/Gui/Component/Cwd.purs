@@ -7,6 +7,7 @@ import Control.Monad.Eff.Class
 import Control.Monad.Eff.Console
 import Data.Either
 import Psc.Ide.Command
+import Psc.Gui.Component.Util
 import Node.Process
 
 import qualified Thermite as T
@@ -24,8 +25,7 @@ type CwdEff eff = (process :: PROCESS | eff)
 
 render :: forall eff. T.Render (CwdEff eff) State Props Action
 render send s _ children = D.div [P.key "cwd"] [
-  D.text "Current working directory: ",
-  D.button
+  sbutton "blue"
     [P.onClick \_ -> send Refresh]
     [D.text "Refresh"],
   D.p' [D.text s.directory]

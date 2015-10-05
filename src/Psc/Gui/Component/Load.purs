@@ -26,22 +26,23 @@ initialState = {modules: [], moduleInput: "Module.Name"}
 
 render :: forall eff. T.Render (LoadEff eff) State LoadProps Action
 render send state props children = D.div [P.key "load"] [
-  D.button
+  sbutton "blue"
     [P.onClick \_ -> send Refresh]
     [D.text "Refresh"],
-  D.input
-    [P.onChange \e -> send (InputChange (unsafeTargetValue e))
+  sinput
+    [ P._type "text"
+    , P.onChange \e -> send (InputChange (unsafeTargetValue e))
     , P.value state.moduleInput
-    ]
-    [],
-  D.button
+    ],
+  sbutton "green"
     [P.onClick \_ -> send LoadModule]
     [D.text "Load Module"],
-  D.button
+  sbutton "green"
     [P.onClick \_ -> send LoadDependency]
     [D.text "Load Dependencies"],
-  D.ul' (map (\m -> D.li' [D.text m]) state.modules)
-
+  D.ul
+    [P.style {maxHeight: 200, overflowY: "auto", overflowX: "hidden"}]
+    (map (\m -> D.li' [D.text m]) state.modules)
   ]
 
 performAction :: forall eff. T.PerformAction (LoadEff eff) State LoadProps Action
