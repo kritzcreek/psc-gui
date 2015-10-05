@@ -18,6 +18,12 @@ cwd = unwrapResponse <$> (pscIde (show (encodeJson Cwd)))
 list :: forall eff. Eff( process :: PROCESS | eff) (Result Modules)
 list = unwrapResponse <$> pscIde (show (encodeJson Ls))
 
+load :: forall eff.
+  Array String ->
+  Array String ->
+  Eff( process :: PROCESS | eff) (Result Message)
+load ms ds = unwrapResponse <$> pscIde (show (encodeJson (Load ms ds)))
+
 quit :: forall eff. Eff( process :: PROCESS | eff) (Result Message)
 quit = unwrapResponse <$> pscIde (show (encodeJson Quit))
 
