@@ -2,7 +2,7 @@ module Node.Process where
 
 import Prelude
 import Control.Monad.Eff
-import PscIde.Command
+import Psc.Ide.Command
 import Data.Argonaut.Encode (EncodeJson, encodeJson)
 
 foreign import data PROCESS :: !

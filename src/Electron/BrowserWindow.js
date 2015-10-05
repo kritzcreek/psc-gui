@@ -15,7 +15,9 @@ var loadUrl = function(bw, url){
     }
 }
 
-module.exports = {
+exports = {
   newBrowserWindow: newBrowserWindow,
   loadUrl: R.curry(loadUrl)
 }
+
+module.exports = exports

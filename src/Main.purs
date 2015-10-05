@@ -2,7 +2,7 @@ module Main where
 
 import Prelude
 import Electron.BrowserWindow (newBrowserWindow, loadUrl)
-import PscIde.Command
+import Psc.Ide.Command
 import Node.Process
 import Control.Monad.Eff.Console
 import Data.Either

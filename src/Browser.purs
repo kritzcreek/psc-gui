@@ -5,7 +5,7 @@ import           Control.Monad.Eff.Console
 import           Data.Either
 import           Data.Maybe.Unsafe
 import           Data.Nullable (toMaybe)
-import           PscIde.Command
+import           Psc.Ide.Command
 import           Node.Process
 import           DOM (DOM())
 import           DOM.HTML (window)
@@ -24,7 +24,7 @@ comp s ctx = D.div' [
     [P.onClick \_ -> do
       (Right (Message d)) <- cwd
       writeState ctx d]
-    [D.text "CWD"]
+    [D.text "Current Working Directory"]
   , D.text s
   ]
   where logMessage (Message m) = log m

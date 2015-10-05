@@ -1,4 +1,4 @@
-module PscIde.Command where
+module Psc.Ide.Command where
 
 import Control.Monad.Eff
 
