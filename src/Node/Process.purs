@@ -27,5 +27,5 @@ load ms ds = unwrapResponse <$> pscIde (show (encodeJson (Load ms ds)))
 quit :: forall eff. Eff( process :: PROCESS | eff) (Result Message)
 quit = unwrapResponse <$> pscIde (show (encodeJson Quit))
 
-pursuitCompletion :: forall eff. String -> Eff( process :: PROCESS | eff) (Result PursuitCompletion)
+pursuitCompletion :: forall eff. String -> Eff( process :: PROCESS | eff) (Result (Array PursuitCompletion))
 pursuitCompletion q = unwrapResponse <$> pscIde (show (encodeJson (Pursuit Ident q)))

@@ -12,6 +12,7 @@ import           DOM.Node.Types (Element())
 
 import Psc.Gui.Component.Cwd
 import Psc.Gui.Component.Load
+import Psc.Gui.Component.Pursuit
 import React
 import qualified React.DOM as D
 
@@ -19,7 +20,7 @@ main = do
   body' <- getBody
   render ui body'
   where
-    ui = D.div' [cwdF, loadF]
+    ui = D.div' [cwdF, loadF, pursuitF]
     getBody = do
       win <- window
       doc <- document win
