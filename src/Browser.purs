@@ -13,6 +13,7 @@ import           DOM.Node.Types (Element())
 import Psc.Gui.Component.Cwd
 import Psc.Gui.Component.Load
 import Psc.Gui.Component.Pursuit
+import Psc.Gui.Component.Completion
 import Psc.Gui.Component.CardWrapper
 
 import React
@@ -25,6 +26,7 @@ main = do
   where
     ui = D.div [P.className "ui grid"] [
       D.div [P.className "three column row"] [
+        cardWrapper "Completion" completionF,
         cardWrapper "Current Working Directory" cwdF,
         cardWrapper "Loading Modules" loadF,
         cardWrapper "Pursuit" pursuitF

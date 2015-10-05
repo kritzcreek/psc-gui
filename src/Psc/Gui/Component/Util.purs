@@ -3,6 +3,8 @@ module Psc.Gui.Component.Util where
 import Prelude
 
 import Unsafe.Coerce
+import Data.Array
+import Data.Tuple
 
 import qualified React as R
 import qualified React.DOM as D
@@ -25,3 +27,9 @@ sinput props = D.div [P.className "ui input"]
 
 unsafeTargetValue :: forall a. a -> String
 unsafeTargetValue ev = (unsafeCoerce ev).target.value
+
+enumerate :: forall a. Array a -> Array (Tuple Int a)
+enumerate as = zip (range 0 (length as - 1)) as
+
+zipWithEnumerated :: forall a b. (Int -> a -> b)-> Array a -> Array b
+zipWithEnumerated f as = map (uncurry f) (enumerate as)
