@@ -61,7 +61,8 @@ performAction _ LoadDependency = do
   liftEff (either log (\(Message s) -> log s) res)
 
 spec :: forall eff. T.Spec (LoadEff eff) State LoadProps Action
-spec = T.simpleSpec initialState performAction render
+spec = T.componentWillMount Refresh $
+  T.simpleSpec initialState performAction render
 
 loadF :: R.ReactElement
 loadF = R.createFactory (T.createClass spec) {}
