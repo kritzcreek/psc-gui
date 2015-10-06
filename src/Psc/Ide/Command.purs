@@ -134,7 +134,7 @@ instance decodeModules :: DecodeJson Modules where
 instance decodeCompletion :: DecodeJson Completion where
   decodeJson json = do
     o <- decodeJson json
-    identifier <- o .? "ident"
+    identifier <- o .? "identifier"
     type' <- o .? "type"
     module' <- o .? "module"
     return (Completion {identifier: identifier, type': type', module': module'})

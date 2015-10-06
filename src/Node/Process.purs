@@ -3,6 +3,7 @@ module Node.Process where
 import Prelude
 import Control.Monad.Eff
 import Psc.Ide.Command
+import Data.Maybe
 import Data.Argonaut.Encode (EncodeJson, encodeJson)
 
 foreign import data PROCESS :: !
@@ -29,3 +30,9 @@ quit = unwrapResponse <$> pscIde (show (encodeJson Quit))
 
 pursuitCompletion :: forall eff. String -> Eff( process :: PROCESS | eff) (Result (Array PursuitCompletion))
 pursuitCompletion q = unwrapResponse <$> pscIde (show (encodeJson (Pursuit Ident q)))
+
+complete :: forall eff.
+  Array Filter ->
+  Maybe Matcher ->
+  Eff ( process :: PROCESS | eff) (Result (Array Completion))
+complete fs m = unwrapResponse <$> pscIde (show (encodeJson (Complete fs m)))
