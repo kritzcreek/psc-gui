@@ -21,8 +21,7 @@ import qualified React.DOM as D
 import qualified React.DOM.Props as P
 
 data Action =
-  CompleteSymbol
-  | InputChange String
+  InputChange String
   | FilterTypeChange String
   | FilterChange Int Filter
   | RemoveFilter Int
@@ -89,23 +88,16 @@ render send state props children =
   D.div' [
     D.select [P.onChange \ev -> send (FilterTypeChange (unsafeTargetValue ev))]
       (map (\x -> D.option' [D.text x]) ["ExactFilter", "PrefixFilter",   "ModuleFilter", "DependencyFilter"]),
+    sbutton "green" [P.onClick \_ -> send AddFilter] [D.text "Add Filter"],
     sinput [P.onChange \ev -> send (InputChange (unsafeTargetValue ev))],
-    sbutton "green" [P.onClick \_ -> send CompleteSymbol] [D.text "Complete"],
-    sbutton "" [P.onClick \_ -> send AddFilter] [D.text "Add Filter"],
     D.div' (zipWithEnumerated (renderFilter send) state.filters),
     D.div' (map renderCompletion state.completions)
   ]
 
 performAction :: forall eff. T.PerformAction (CompletionEff eff) State CompletionProps Action
-performAction _ CompleteSymbol = do
-  s <- T.getState
-  r <- liftEff $ complete s.filters if s.input /= ""
-                                    then Just (Flex s.input)
-                                    else Nothing
-  case r of
-    Left err -> liftEff $ log err
-    Right r  -> T.modifyState (_ {completions=r})
-performAction _ (InputChange i) = T.modifyState \s -> s{input=i}
+performAction _ (InputChange i) = do
+  T.modifyState \s -> s{input=i}
+  updateCompletions
 performAction _ AddFilter =
   let construct "ExactFilter" = ExactFilter ""
       construct "PrefixFilter" = PrefixFilter ""
@@ -118,6 +110,16 @@ performAction _ (RemoveFilter filterId) = do
 performAction _ (FilterChange filterId newFilter) = T.modifyState \s ->
   s{filters = fromJust (modifyAt filterId (const newFilter) s.filters)}
 performAction _ (FilterTypeChange s) = T.modifyState (_ {filterType=s})
+
+updateCompletions :: forall eff. T.Action (CompletionEff eff) State Unit
+updateCompletions = do
+  s <- T.getState
+  r <- liftEff $ complete s.filters if s.input /= ""
+                                    then Just (Flex s.input)
+                                    else Nothing
+  case r of
+    Left err -> liftEff $ log err
+    Right r  -> T.modifyState (_ {completions=r})
 
 spec :: forall eff. T.Spec (CompletionEff eff) State CompletionProps Action
 spec = T.simpleSpec initialState performAction render
