@@ -1,6 +1,5 @@
 var app = require('app');  // Module to control application life.
 var BrowserWindow = require('browser-window');
-// var Main = require('./output/Main/index.js');
 // Report crashes to our server.
 require('crash-reporter').start();
 
@@ -17,9 +16,7 @@ app.on('window-all-closed', function() {
   }
 });
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-app.on('ready', function(){
+var runApp = function(){
   mainWindow = new BrowserWindow({width: 800, height: 600});
 
   // and load the index.html of the app.
@@ -35,4 +32,11 @@ app.on('ready', function(){
     // when you should delete the corresponding element.
     mainWindow = null;
   });
-});
+};
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+app.on('ready', runApp);
+
+// var Main = require('./output/Main/index.js');
+// app.on('ready', Main.main);
