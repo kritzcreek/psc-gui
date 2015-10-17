@@ -19,7 +19,7 @@ cwd = unwrapResponse <$> (pscIde (show (encodeJson Cwd)))
 listLoadedModules :: forall eff. Eff( process :: PROCESS | eff) (Result Modules)
 listLoadedModules = unwrapResponse <$> pscIde (show (encodeJson (Ls LoadedModules)))
 
-listImports :: forall eff. String -> Eff( process :: PROCESS | eff) (Result Message)
+listImports :: forall eff. String -> Eff( process :: PROCESS | eff) (Result ImportList)
 listImports fp = unwrapResponse <$> pscIde (show (encodeJson (Ls (Imports fp))))
 
 load :: forall eff.

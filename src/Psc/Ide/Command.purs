@@ -1,20 +1,19 @@
 module Psc.Ide.Command where
 
+import Control.Alt
 import Control.Monad.Eff
-
-import Prelude
-import Data.Argonaut.Core (jsonEmptyObject, jsonSingletonObject, Json(..))
-import Data.Argonaut.Printer
-import Data.Argonaut.Parser (jsonParser)
 import Data.Argonaut.Combinators ((~>), (:=), (.?))
-import Data.Argonaut.Encode (EncodeJson, encodeJson)
+import Data.Argonaut.Core (jsonEmptyObject, jsonSingletonObject, Json(..))
 import Data.Argonaut.Decode (DecodeJson, decodeJson)
-
+import Data.Argonaut.Encode (EncodeJson, encodeJson)
+import Data.Argonaut.Parser (jsonParser)
+import Data.Argonaut.Printer
 import Data.Array (tail)
 import Data.Either
 import Data.Maybe
 import Data.Maybe.Unsafe
 import Data.String (split)
+import Prelude
 
 data PSType = Package | Ident
 
@@ -113,6 +112,15 @@ newtype Completion = Completion (GenCompletion ())
 newtype PursuitCompletion = PursuitCompletion (GenCompletion (package :: String))
 newtype Modules = Modules (Array String)
 newtype Message = Message String
+newtype ImportList = ImportList (Array Import)
+newtype Import = Import
+  {
+    moduleName :: String,
+    importType :: ImportType,
+    qualifier  :: Maybe String
+  }
+
+data ImportType = Implicit | Explicit (Array String) | Hiding (Array String)
 
 unwrapResponse :: forall a. (DecodeJson a) => String -> Either String a
 unwrapResponse s = do
@@ -156,3 +164,26 @@ instance decodePursuitCompletion :: DecodeJson PursuitCompletion where
       module': module',
       package: package
       })
+
+instance decodeImportList :: DecodeJson ImportList where
+  decodeJson json = do
+    imports <- decodeJson json
+    return (ImportList imports)
+
+instance decodeImport :: DecodeJson Import where
+  decodeJson json = do
+    o <- decodeJson json
+    moduleName <- o .? "module"
+    importType <- o .? "importType"
+    -- qualifier  <- o .? "qualifier"
+    case importType of
+      "implicit" -> do
+        q <- (Just <$> o .? "qualifier") <|> return Nothing
+        -- q <- o .? "qualifier"
+        return $ Import {moduleName: moduleName, importType: Implicit, qualifier: q}
+      "explicit" -> do
+        identifiers <- o .? "identifiers"
+        return $ Import {moduleName: moduleName, importType: Explicit identifiers, qualifier: Nothing}
+      "hiding"   -> do
+        identifiers <- o .? "identifiers"
+        return $ Import {moduleName: moduleName, importType: Hiding identifiers, qualifier: Nothing}
