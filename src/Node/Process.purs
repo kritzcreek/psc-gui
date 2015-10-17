@@ -16,8 +16,11 @@ pscIde q = exec "psc-ide" q
 cwd :: forall eff. Eff( process :: PROCESS | eff) (Result Message)
 cwd = unwrapResponse <$> (pscIde (show (encodeJson Cwd)))
 
-list :: forall eff. Eff( process :: PROCESS | eff) (Result Modules)
-list = unwrapResponse <$> pscIde (show (encodeJson Ls))
+listLoadedModules :: forall eff. Eff( process :: PROCESS | eff) (Result Modules)
+listLoadedModules = unwrapResponse <$> pscIde (show (encodeJson (Ls LoadedModules)))
+
+listImports :: forall eff. String -> Eff( process :: PROCESS | eff) (Result Message)
+listImports fp = unwrapResponse <$> pscIde (show (encodeJson (Ls (Imports fp))))
 
 load :: forall eff.
   Array String ->

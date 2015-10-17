@@ -47,7 +47,9 @@ render send state props children = D.div [P.key "load"] [
 
 performAction :: forall eff. T.PerformAction (LoadEff eff) State LoadProps Action
 performAction _ Refresh = do
-  mods <- liftEff $ list
+  (Right (Message res)) <- liftEff $ listImports "src/Browser.purs"
+  liftEff (log res)
+  mods <- liftEff $ listLoadedModules
   case mods of
     Right (Modules ms) -> T.modifyState (\s -> s {modules=ms})
     Left err -> liftEff (log err)

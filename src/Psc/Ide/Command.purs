@@ -60,11 +60,13 @@ instance encodeFilter :: EncodeJson Filter where
 
 data Command =
   Cwd
-  | Ls
+  | Ls ListType
   | Quit
   | Load (Array String) (Array String)
   | Complete (Array Filter) (Maybe Matcher)
   | Pursuit PSType String
+
+data ListType = LoadedModules | Imports String
 
 commandWrapper :: forall a. (EncodeJson a) => String -> a -> Json
 commandWrapper s o =
@@ -74,7 +76,10 @@ commandWrapper s o =
 
 instance encodeCommand :: EncodeJson Command where
   encodeJson Cwd = jsonSingletonObject' "command" "cwd"
-  encodeJson Ls = jsonSingletonObject' "command" "list"
+  encodeJson (Ls LoadedModules) =
+    commandWrapper "list" ("type" := "module" ~> jsonEmptyObject)
+  encodeJson (Ls (Imports fp)) =
+    commandWrapper "list" ("type" := "import" ~> "file" := fp ~> jsonEmptyObject)
   encodeJson Quit = jsonSingletonObject' "command" "quit"
   encodeJson (Load modules dependencies) =
     commandWrapper "load" (
@@ -123,10 +128,7 @@ unwrapResponse s = do
       Left result
 
 instance decodeMessage :: DecodeJson Message where
-  decodeJson json = maybe
-    (Left "ParseError")
-    (Right <<< Message)
-    (toString json)
+  decodeJson json = return (Message (printJson json))
 
 instance decodeModules :: DecodeJson Modules where
   decodeJson json = do
