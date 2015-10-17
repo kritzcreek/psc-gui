@@ -3,8 +3,10 @@ module Psc.Ide.Command where
 import Control.Monad.Eff
 
 import Prelude
-import Data.Argonaut ((~>), (:=), (.?), jsonEmptyObject, printJson, jsonParser)
-import Data.Argonaut.Core
+import Data.Argonaut.Core (jsonEmptyObject, jsonSingletonObject, Json(..))
+import Data.Argonaut.Printer
+import Data.Argonaut.Parser (jsonParser)
+import Data.Argonaut.Combinators ((~>), (:=), (.?))
 import Data.Argonaut.Encode (EncodeJson, encodeJson)
 import Data.Argonaut.Decode (DecodeJson, decodeJson)
 
