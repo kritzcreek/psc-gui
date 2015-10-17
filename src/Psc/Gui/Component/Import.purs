@@ -52,7 +52,7 @@ performAction _ Submit = do
       T.modifyState (_ {imports=err})
 performAction _ Dialog = do
   paths <- liftEff $ showOpenDialog defaultOpts
-  T.modifyState (_ {input=fromMaybe "" (head paths)})
+  T.modifyState (_ {input=fromMaybe "" (head (fromMaybe [""] paths))})
 
 spec :: forall eff. T.Spec (ImportEff eff) State Props Action
 spec = T.simpleSpec initialState performAction render
