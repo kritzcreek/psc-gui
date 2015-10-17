@@ -66,8 +66,11 @@ performAction _ Submit = do
     Left err -> do
       liftEff $ log err
 performAction _ Dialog = do
-  paths <- liftEff $ showOpenDialog defaultOpts
+  response <- liftEff cwd
+  paths <- liftEff $ showOpenDialog (defaultOpts {defaultPath=unwrapDir response})
   T.modifyState (_ {input=fromMaybe "" (head (fromMaybe [""] paths))})
+  where unwrapDir (Right (Message d)) = d
+        unwrapDir _ = ""
 
 spec :: forall eff. T.Spec (ImportEff eff) State Props Action
 spec = T.simpleSpec initialState performAction render
