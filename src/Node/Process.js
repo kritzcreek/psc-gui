@@ -1,7 +1,7 @@
 //module Node.Process
 
 var child_process = process.type === 'browser' ?
-  require('child_process') : window.require('remote').require('child_process')
+      require('child_process') : window.require('remote').require('child_process')
 
 var exec = function(cmd){
   return function(input){

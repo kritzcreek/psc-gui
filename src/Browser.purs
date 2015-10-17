@@ -14,6 +14,7 @@ import           DOM.Node.Types (Element())
 import           Psc.Gui.Component.Cwd
 import           Psc.Gui.Component.Load
 import           Psc.Gui.Component.Pursuit
+import           Psc.Gui.Component.Import
 import           Psc.Gui.Component.Completion
 import           Psc.Gui.Component.CardWrapper
 import           Psc.Gui.Component.Tabbar
@@ -44,7 +45,7 @@ main = do
   where
     ui channel activeTab = D.div' [
       tabbarF {
-        tabs: ["Completion", "Modules", "Pursuit"],
+        tabs: ["Completion", "Modules", "Pursuit", "Imports"],
         activeTab: activeTab,
         channel: channel
         },
@@ -55,6 +56,7 @@ main = do
             0 -> cardWrapper "Completion" completionF
             1 -> cardWrapper "Loading Modules" loadF
             2 -> cardWrapper "Pursuit" pursuitF
+            3 -> cardWrapper "Imports" importF
             _ -> D.text "Wattafak"
         ]
       ]
