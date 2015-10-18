@@ -20,6 +20,9 @@ import           Psc.Gui.Component.CardWrapper
 import           Psc.Gui.Component.Tabbar
 import           Psc.Gui.Component.Types
 
+import Node.Process
+import Node.Stream (onData)
+
 import           React
 import qualified React.DOM as D
 import qualified React.DOM.Props as P
@@ -37,6 +40,8 @@ step (ChangeTab x) as = as {activeTab=x}
 
 main = do
   body' <- getBody
+  ideServer <- spawnPscIdeServer "/home/creek/Documents/psc-gui"
+  onData ideServer.stdout log
   channel <- C.channel (ChangeTab 0)
   let actions = C.subscribe channel
   let state = S.foldp step newState actions S.~> (\as ->

@@ -14,6 +14,15 @@ var exec = function(cmd){
   }
 }
 
+var spawn = function(cmd){
+  return function(args){
+    return function(){
+      return child_process.spawn(cmd, args)
+    }
+  }
+}
+
 module.exports = {
-  exec: exec
+  exec: exec,
+  spawn: spawn
 }
