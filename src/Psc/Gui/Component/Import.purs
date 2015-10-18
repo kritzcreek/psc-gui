@@ -67,7 +67,7 @@ performAction _ Submit = do
       liftEff $ log err
 performAction _ Dialog = do
   response <- liftEff cwd
-  paths <- liftEff $ showOpenDialog (defaultOpts {defaultPath=unwrapDir response})
+  paths <- liftEff $ showOpenDialog (defaultOpts {defaultPath=unwrapDir response, title="Choose a file to parse"})
   T.modifyState (_ {input=fromMaybe "" (head (fromMaybe [""] paths))})
   where unwrapDir (Right (Message d)) = d
         unwrapDir _ = ""

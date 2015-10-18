@@ -26,6 +26,7 @@ data Action =
   | FilterChange Int Filter
   | RemoveFilter Int
   | AddFilter
+  | SubmitComplete
 
 type State = {
   input       :: String,
@@ -89,15 +90,14 @@ render send state props children =
     D.select [P.onChange \ev -> send (FilterTypeChange (unsafeTargetValue ev))]
       (map (\x -> D.option' [D.text x]) ["ExactFilter", "PrefixFilter",   "ModuleFilter", "DependencyFilter"]),
     sbutton "green" [P.onClick \_ -> send AddFilter] [D.text "Add Filter"],
+    sbutton "blue" [P.onClick \_ -> send SubmitComplete] [D.text "Complete"],
     sinput [P.onChange \ev -> send (InputChange (unsafeTargetValue ev))],
     D.div' (zipWithEnumerated (renderFilter send) state.filters),
     D.div' (map renderCompletion state.completions)
   ]
 
 performAction :: forall eff. T.PerformAction (CompletionEff eff) State CompletionProps Action
-performAction _ (InputChange i) = do
-  T.modifyState \s -> s{input=i}
-  updateCompletions
+performAction _ (InputChange i) = T.modifyState \s -> s{input=i}
 performAction _ AddFilter =
   let construct "ExactFilter" = ExactFilter ""
       construct "PrefixFilter" = PrefixFilter ""
@@ -110,6 +110,7 @@ performAction _ (RemoveFilter filterId) = do
 performAction _ (FilterChange filterId newFilter) = T.modifyState \s ->
   s{filters = fromJust (modifyAt filterId (const newFilter) s.filters)}
 performAction _ (FilterTypeChange s) = T.modifyState (_ {filterType=s})
+performAction _ SubmitComplete = updateCompletions
 
 updateCompletions :: forall eff. T.Action (CompletionEff eff) State Unit
 updateCompletions = do
