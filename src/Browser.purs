@@ -40,8 +40,8 @@ step (ChangeTab x) as = as {activeTab=x}
 
 main = do
   body' <- getBody
-  ideServer <- spawnPscIdeServer "/home/creek/Documents/psc-gui"
-  onData ideServer.stdout log
+  -- ideServer <- spawnPscIdeServer "/home/creek/Documents/psc-gui"
+  -- onData ideServer.stdout log
   channel <- C.channel (ChangeTab 0)
   let actions = C.subscribe channel
   let state = S.foldp step newState actions S.~> (\as ->
