@@ -27,7 +27,7 @@ type State = {
   }
 initialState = {input: "", imports: []}
 type Props = Unit
-type ImportEff eff = (process :: PROCESS | eff)
+type ImportEff eff = (process :: PROCESS, dialog :: DIALOG, console :: CONSOLE | eff)
 
 prettyImport :: Import -> String
 prettyImport (Import i) = prettyImport' i

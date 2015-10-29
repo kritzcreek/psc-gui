@@ -23,7 +23,7 @@ type State = {
   input :: String
 }
 type PursuitProps = {}
-type PursuitEff eff = ( process :: PROCESS | eff )
+type PursuitEff eff = ( process :: PROCESS, console :: CONSOLE | eff )
 initialState = {packages: [], completions: [], input: "Query"}
 
 pursuitCompletionCard :: PursuitCompletion -> R.ReactElement

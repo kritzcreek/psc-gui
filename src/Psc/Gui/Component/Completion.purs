@@ -38,7 +38,7 @@ type State = {
 
 type CompletionProps = {}
 
-type CompletionEff eff = ( console :: CONSOLE | eff )
+type CompletionEff eff = ( process :: PROCESS, console :: CONSOLE | eff )
 
 initialState = {
   input: "",

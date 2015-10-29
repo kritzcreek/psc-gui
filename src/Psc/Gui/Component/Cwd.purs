@@ -21,7 +21,7 @@ data Action = Refresh
 type State = {directory :: String}
 initialState = {directory: ""}
 type Props = Unit
-type CwdEff eff = (process :: PROCESS | eff)
+type CwdEff eff = (process :: PROCESS, console :: CONSOLE | eff)
 
 render :: forall eff. T.Render (CwdEff eff) State Props Action
 render send s _ children = D.div [P.key "cwd"] [

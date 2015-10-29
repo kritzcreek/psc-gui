@@ -21,7 +21,7 @@ import qualified React.DOM.Props as P
 data Action = Refresh | LoadModule | LoadDependency | InputChange String
 type State = {modules :: Array String, moduleInput :: String}
 type LoadProps = {}
-type LoadEff eff = ( process :: PROCESS | eff )
+type LoadEff eff = ( process :: PROCESS, console :: CONSOLE | eff )
 initialState = {modules: [], moduleInput: "Module.Name"}
 
 render :: forall eff. T.Render (LoadEff eff) State LoadProps Action
