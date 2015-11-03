@@ -14,7 +14,6 @@ import Psc.Gui.Component.Util
 import Node.Process
 
 import qualified Thermite as T
-import qualified Thermite.Action as T
 
 import qualified React as R
 import qualified React.DOM as D
@@ -84,9 +83,9 @@ renderCompletion (Completion c) =
     D.p' [D.text $ "Module: " ++ c.module']
   ]
 
-render :: forall eff. T.Render (CompletionEff eff) State CompletionProps Action
-render send state props children =
-  D.div' [
+render :: forall eff. T.Render State CompletionProps Action
+render send props state children =
+  [D.div' [
     D.select [P.onChange \ev -> send (FilterTypeChange (unsafeTargetValue ev))]
       (map (\x -> D.option' [D.text x]) ["ExactFilter", "PrefixFilter",   "ModuleFilter", "DependencyFilter"]),
     sbutton "green" [P.onClick \_ -> send AddFilter] [D.text "Add Filter"],
@@ -94,36 +93,39 @@ render send state props children =
     sinput [P.onChange \ev -> send (InputChange (unsafeTargetValue ev))],
     D.div' (zipWithEnumerated (renderFilter send) state.filters),
     D.div' (map renderCompletion state.completions)
-  ]
+  ]]
 
 performAction :: forall eff. T.PerformAction (CompletionEff eff) State CompletionProps Action
-performAction _ (InputChange i) = T.modifyState \s -> s{input=i}
-performAction _ AddFilter =
+performAction (InputChange i) _ s k = k (s { input=i })
+performAction AddFilter       _ s k =
   let construct "ExactFilter" = ExactFilter ""
       construct "PrefixFilter" = PrefixFilter ""
       construct "ModuleFilter" = ModuleFilter [""]
       construct "DependencyFilter" = DependencyFilter [""]
-  in T.modifyState \s ->
-    s{filters = s.filters `snoc` (construct s.filterType)}
-performAction _ (RemoveFilter filterId) = do
-  T.modifyState (\s -> s {filters = fromJust (deleteAt filterId s.filters)})
-performAction _ (FilterChange filterId newFilter) = T.modifyState \s ->
-  s{filters = fromJust (modifyAt filterId (const newFilter) s.filters)}
-performAction _ (FilterTypeChange s) = T.modifyState (_ {filterType=s})
-performAction _ SubmitComplete = updateCompletions
+  in k $ s {filters = s.filters `snoc` (construct s.filterType)}
+performAction (RemoveFilter filterId) _ s k =
+  k $ s {filters = fromJust (deleteAt filterId s.filters)}
+performAction (FilterChange filterId newFilter) _ s k = k $
+  s {filters = fromJust (modifyAt filterId (const newFilter) s.filters)}
+performAction (FilterTypeChange filterType) _ s k = k (s {filterType=filterType})
+performAction SubmitComplete _ s k =
+  do
+    newState <- updateCompletions s
+    k newState
 
-updateCompletions :: forall eff. T.Action (CompletionEff eff) State Unit
-updateCompletions = do
-  s <- T.getState
-  r <- liftEff $ complete s.filters if s.input /= ""
-                                    then Just (Flex s.input)
-                                    else Nothing
+-- updateCompletions :: forall eff. T.Action (CompletionEff eff) State Unit
+updateCompletions s = do
+  r <- complete s.filters if s.input /= ""
+                          then Just (Flex s.input)
+                          else Nothing
   case r of
-    Left err -> liftEff $ log err
-    Right r  -> T.modifyState (_ {completions=r})
+    Left err -> do
+      log err
+      return s
+    Right r  -> return (s {completions=r})
 
 spec :: forall eff. T.Spec (CompletionEff eff) State CompletionProps Action
-spec = T.simpleSpec initialState performAction render
+spec = T.simpleSpec performAction render
 
 completionF :: R.ReactElement
-completionF = R.createFactory (T.createClass spec) {}
+completionF = R.createFactory (T.createClass spec initialState) {}
