@@ -12,7 +12,6 @@ import Psc.Ide.Command
 import Psc.Gui.Component.Util
 
 import qualified Thermite as T
-import qualified Thermite.Action as T
 
 import qualified React as R
 import qualified React.DOM as D
@@ -24,8 +23,8 @@ type LoadProps = {}
 type LoadEff eff = ( process :: PROCESS, console :: CONSOLE | eff )
 initialState = {modules: [], moduleInput: "Module.Name"}
 
-render :: forall eff. T.Render (LoadEff eff) State LoadProps Action
-render send state props children = D.div [P.key "load"] [
+render :: forall eff. T.Render State LoadProps Action
+render send _ state children = [ D.div [P.key "load"] [
   sbutton "blue"
     [P.onClick \_ -> send Refresh]
     [D.text "Refresh"],
@@ -43,27 +42,24 @@ render send state props children = D.div [P.key "load"] [
   D.ul
     [P.style {maxHeight: 200, overflowY: "auto", overflowX: "hidden"}]
     (map (\m -> D.li' [D.text m]) state.modules)
-  ]
+  ] ]
 
 performAction :: forall eff. T.PerformAction (LoadEff eff) State LoadProps Action
-performAction _ Refresh = do
-  mods <- liftEff $ listLoadedModules
+performAction Refresh _ s k = do
+  mods <- listLoadedModules
   case mods of
-    Right (Modules ms) -> T.modifyState (\s -> s {modules=ms})
-    Left err -> liftEff (log err)
-performAction _ (InputChange i) = T.modifyState (\s -> s {moduleInput=i})
-performAction _ LoadModule = do
-  i <- T.getState
-  res <- liftEff (load [i.moduleInput] [])
-  liftEff (either log (\(Message s) -> log s) res)
-performAction _ LoadDependency = do
-  i <- T.getState
-  res <- liftEff (load [] [i.moduleInput])
-  liftEff (either log (\(Message s) -> log s) res)
+    Right (Modules ms) -> k (s {modules=ms})
+    Left err -> log err
+performAction (InputChange i) _ s k = k (s { moduleInput=i })
+performAction LoadModule _ s k = do
+  res <- load [s.moduleInput] []
+  either log (\(Message s) -> log s) res
+performAction LoadDependency _ s k = do
+  res <- load [] [s.moduleInput]
+  either log (\(Message s) -> log s) res
 
 spec :: forall eff. T.Spec (LoadEff eff) State LoadProps Action
-spec = T.componentWillMount Refresh $
-  T.simpleSpec initialState performAction render
+spec = T.simpleSpec performAction render
 
 loadF :: R.ReactElement
-loadF = R.createFactory (T.createClass spec) {}
+loadF = R.createFactory (T.createClass spec initialState) {}

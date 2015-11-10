@@ -14,7 +14,6 @@ import           Psc.Gui.Component.Util
 import           Psc.Ide.Command
 
 import qualified Thermite as T
-import qualified Thermite.Action as T
 
 import qualified React as R
 import qualified React.DOM as D
@@ -46,8 +45,8 @@ prettyImport (Import i) = prettyImport' i
                          qualifier: Nothing }) =
           "import " ++ moduleName ++ " hiding ( " ++ joinWith ", " idents ++ " )"
 
-render :: forall eff. T.Render (ImportEff eff) State Props Action
-render send s _ children = D.div [P.key "import"] ([
+render :: T.Render State Props Action
+render send _ s children = [D.div [P.key "import"] ([
   D.p' [D.text s.input],
   sbutton "blue"
     [P.onClick \_ -> send Submit]
@@ -55,25 +54,23 @@ render send s _ children = D.div [P.key "import"] ([
   sbutton "red"
     [P.onClick \_ -> send Dialog]
     [D.text "Choose File"]
-  ] ++ map (\i -> D.p' [D.text (prettyImport i)]) s.imports)
+  ] ++ map (\i -> D.p' [D.text (prettyImport i)]) s.imports)]
 
 performAction :: forall eff. T.PerformAction (ImportEff eff) State Props Action
-performAction _ Submit = do
-  s <- T.getState
-  dir <- liftEff (listImports s.input)
+performAction Submit _ s k = do
+  dir <- listImports s.input
   case dir of
-    Right (ImportList imports) -> T.modifyState (_ {imports=imports})
-    Left err -> do
-      liftEff $ log err
-performAction _ Dialog = do
-  response <- liftEff cwd
-  paths <- liftEff $ showOpenDialog (defaultOpts {defaultPath=unwrapDir response, title="Choose a file to parse"})
-  T.modifyState (_ {input=fromMaybe "" (head (fromMaybe [""] paths))})
+    Right (ImportList imports) -> k (s { imports=imports })
+    Left err -> log err
+performAction Dialog _ s k = do
+  response <- cwd
+  paths <- showOpenDialog (defaultOpts {defaultPath=unwrapDir response, title="Choose a file to parse"})
+  k (s {input=fromMaybe "" (head (fromMaybe [""] paths))})
   where unwrapDir (Right (Message d)) = d
         unwrapDir _ = ""
 
 spec :: forall eff. T.Spec (ImportEff eff) State Props Action
-spec = T.simpleSpec initialState performAction render
+spec = T.simpleSpec performAction render
 
 importF :: R.ReactElement
-importF = R.createFactory (T.createClass spec) unit
+importF = R.createFactory (T.createClass spec initialState) unit

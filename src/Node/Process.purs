@@ -21,6 +21,9 @@ type ChildProcess = {
 foreign import spawn :: forall eff.
   String -> Array String -> Eff (process :: PROCESS | eff) ChildProcess
 
+foreign import kill :: forall eff.
+  ChildProcess -> Eff (process :: PROCESS | eff) Unit
+
 foreign import exec :: forall eff.
   String -> String -> Eff (process :: PROCESS | eff) String
 
