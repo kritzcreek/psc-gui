@@ -6,3 +6,4 @@
 *.tix
 .browserify-cache*
 app.js
+.tern-port
