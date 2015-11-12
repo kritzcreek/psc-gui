@@ -65,7 +65,7 @@ data Command =
   | Complete (Array Filter) (Maybe Matcher)
   | Pursuit PSType String
 
-data ListType = LoadedModules | Imports String
+data ListType = LoadedModules | Imports String | AvailableModules
 
 commandWrapper :: forall a. (EncodeJson a) => String -> a -> Json
 commandWrapper s o =
@@ -77,6 +77,8 @@ instance encodeCommand :: EncodeJson Command where
   encodeJson Cwd = jsonSingletonObject' "command" "cwd"
   encodeJson (Ls LoadedModules) =
     commandWrapper "list" ("type" := "module" ~> jsonEmptyObject)
+  encodeJson (Ls AvailableModules) =
+    commandWrapper "list" ("type" := "availableModules" ~> jsonEmptyObject)
   encodeJson (Ls (Imports fp)) =
     commandWrapper "list" ("type" := "import" ~> "file" := fp ~> jsonEmptyObject)
   encodeJson Quit = jsonSingletonObject' "command" "quit"
@@ -111,6 +113,7 @@ type GenCompletion a = {
 newtype Completion = Completion (GenCompletion ())
 newtype PursuitCompletion = PursuitCompletion (GenCompletion (package :: String))
 newtype Modules = Modules (Array String)
+newtype ModuleList = ModuleList (Array String)
 newtype Message = Message String
 newtype ImportList = ImportList (Array Import)
 newtype Import = Import
@@ -142,6 +145,9 @@ instance decodeModules :: DecodeJson Modules where
   decodeJson json = do
     ms <- decodeJson json
     return (Modules (fromJust $ tail (split ", " ms)))
+
+instance decodeModuleList :: DecodeJson ModuleList where
+  decodeJson json = ModuleList <$> decodeJson json
 
 instance decodeCompletion :: DecodeJson Completion where
   decodeJson json = do

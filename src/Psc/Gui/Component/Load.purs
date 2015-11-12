@@ -5,7 +5,7 @@ import Control.Monad.Eff.Class
 import Control.Monad.Eff.Console
 import Data.Foldable
 import Data.Either
-import Data.String (split)
+import Data.String (split, contains)
 
 import Node.Process
 import Psc.Ide.Command
@@ -17,11 +17,16 @@ import qualified React as R
 import qualified React.DOM as D
 import qualified React.DOM.Props as P
 
-data Action = Refresh | LoadModule | LoadDependency | InputChange String
-type State = {modules :: Array String, moduleInput :: String}
+data Action = Refresh
+            | LoadModule
+            | LoadDependency
+            | InputChange String
+            | RefreshAvailableModules
+
+type State = {modules :: Array String, availableModules :: Array String, moduleInput :: String}
 type LoadProps = {}
 type LoadEff eff = ( process :: PROCESS, console :: CONSOLE | eff )
-initialState = {modules: [], moduleInput: "Module.Name"}
+initialState = {modules: [], availableModules: [], moduleInput: "Module.Name"}
 
 render :: forall eff. T.Render State LoadProps Action
 render send _ state children = [ D.div [P.key "load"] [
@@ -31,6 +36,7 @@ render send _ state children = [ D.div [P.key "load"] [
   sinput
     [ P._type "text"
     , P.onChange \e -> send (InputChange (unsafeTargetValue e))
+    , P.onFocus \_ -> send RefreshAvailableModules
     , P.value state.moduleInput
     ],
   sbutton "green"
@@ -57,6 +63,9 @@ performAction LoadModule _ s k = do
 performAction LoadDependency _ s k = do
   res <- load [] [s.moduleInput]
   either log (\(Message s) -> log s) res
+performAction RefreshAvailableModules _ s k = do
+  res <- listAvailableModules
+  either log (\(ModuleList ms) -> k (s { availableModules=ms })) res
 
 spec :: forall eff. T.Spec (LoadEff eff) State LoadProps Action
 spec = T.simpleSpec performAction render
